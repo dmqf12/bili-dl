@@ -1,56 +1,93 @@
-# bili-dl —— B站视频下载器 (Rust)
+# bili-dl
 
-基于 Rust 构建的 B 站视频下载器，核心设计参照 `yt-dlp` 的使用逻辑。
+纯 Rust 实现的 B站视频下载器，零外部依赖（无需 ffmpeg）。
 
-## 🚀 命令行用法 (CLI)
+## 特性
 
-```bash
-bili-dl <URL> [-o <路径>] [--cookie <文件>]
-bili-dl <BV号> [-o <路径>] [--cookie <文件>]
+- 🦀 纯 Rust，无需安装 ffmpeg
+- 🎵 支持仅下载音频/视频
+- 📦 可选自动合成或保留分离文件
+- 🍪 支持 Cookie 登录
+- 🔗 支持 BV号、完整URL、短链接
 
-```
-
-### 📋 选项说明
-
-| 选项 | 全称 | 描述 |
-| --- | --- | --- |
-| `-o` | `--output <路径>` | 输出文件或目录（目录需以 `/` 结尾，留空则默认使用视频标题作为文件名） |
-|  | `--cookie <文件>` | 登录 cookie 文件路径（支持 JSON 或 Netscape 格式） |
-| `-h` | `--help` | 显示帮助信息 |
-
-### 💡 使用示例
+## 安装
 
 ```bash
-# 1. 基础下载（使用 BV 号）
-bili-dl BVxxx
-
-# 2. 基础下载（使用完整视频链接）
-bili-dl https://www.bilibili.com/video/BVxxx
-
-# 3. 指定输出文件名
-bili-dl https://www.bilibili.com/video/BVxxx -o 视频.mp4
-
-# 4. 指定下载目录并携带 Cookie 凭证
-bili-dl https://www.bilibili.com/video/BVxxx -o ./downloads/ --cookie cookies.json
-
+cargo install bili-dl
 ```
 
----
+## CLI 使用
 
-## 📦 作为 Rust 库 (SDK) 调用
+```bash
+# 基础下载
+bili-dl BV1EXgz6iE7N
+bili-dl https://www.bilibili.com/video/BV1EXgz6iE7N
+bili-dl https://b23.tv/TsQPRlN
 
-你也可以直接将 `bili-dl` 作为依赖引入到你的 Rust 项目中，通过链式调用来执行下载任务：
+# 指定输出
+bili-dl BVxxx -o 视频.mp4
+bili-dl BVxxx -o ./downloads/
+
+# 仅下载音频
+bili-dl BVxxx --audio-only -o ./music/
+
+# 仅下载视频（无音频）
+bili-dl BVxxx --video-only
+
+# 不合成，保留分离的音视频文件
+bili-dl BVxxx --no-merge
+
+# 使用 Cookie
+bili-dl BVxxx --cookie cookies.json
+```
+
+## API 使用
 
 ```rust
 use bili_dl::BiliDownloader;
 
 #[tokio::main]
-async fn main() {
-    BiliDownloader::new("链接或者bv号")
-        .output("./downloads/")
-        .cookie("cookies.json")
+async fn main() -> anyhow::Result<()> {
+    // 完整下载
+    BiliDownloader::new("BV1EXgz6iE7N")
         .download()
-        .await;
-}
+        .await?;
 
+    // 仅下载音频
+    BiliDownloader::new("https://www.bilibili.com/video/BV1EXgz6iE7N")
+        .audio_only(true)
+        .output("./music/")
+        .download()
+        .await?;
+
+    // 仅下载视频
+    BiliDownloader::new("BV1EXgz6iE7N")
+        .video_only(true)
+        .output("output.mp4")
+        .download()
+        .await?;
+
+    // 不合成
+    BiliDownloader::new("BV1EXgz6iE7N")
+        .no_merge(true)
+        .download()
+        .await?;
+
+    Ok(())
+}
 ```
+
+## 选项
+
+| CLI 参数 | API 方法 | 说明 |
+|----------|----------|------|
+| `<URL>` | `BiliDownloader::new(url)` | B站链接或 BV 号 |
+| `-o, --output <路径>` | `.output(path)` | 输出文件或目录 |
+| `--cookie <文件>` | `.cookie(path)` | Cookie 文件路径 |
+| `--video-only` | `.video_only(true)` | 仅下载视频流 |
+| `--audio-only` | `.audio_only(true)` | 仅下载音频流 |
+| `--no-merge` | `.no_merge(true)` | 不合成音视频 |
+
+## 许可
+
+LGPL-2.1-only

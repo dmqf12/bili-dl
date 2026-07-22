@@ -82,7 +82,7 @@ impl reqwest::cookie::CookieStore for CookieProvider {
                 || (c.domain.starts_with('.') && host.ends_with(&c.domain[1..]))
                 || (c.domain.starts_with('.') && host == &c.domain[1..]);
 
-            let path_match = c.path.as_deref().map_or(true, |p| {
+            let path_match = c.path.as_deref().is_none_or(|p| {
                 p == "/" || url_path == p || url_path.starts_with(p)
             });
 

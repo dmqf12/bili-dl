@@ -119,8 +119,8 @@ pub fn extract_formats(play_info: &Value) -> Formats {
 
     if let Some(arr) = play_info["dash"]["audio"].as_array() { pa(arr, &mut audios); }
     if let Some(arr) = play_info["dash"]["dolby"]["audio"].as_array() { pa(arr, &mut audios); }
-    if let Some(flac) = play_info["dash"]["flac"].as_object() {
-        if let Some(audio) = flac.get("audio") {
+    if let Some(flac) = play_info["dash"]["flac"].as_object()
+        && let Some(audio) = flac.get("audio") {
             audios.push(Format {
                 url: audio["baseUrl"].as_str().or(audio["base_url"].as_str()).unwrap_or("").to_string(),
                 width: None, height: None,
@@ -129,7 +129,6 @@ pub fn extract_formats(play_info: &Value) -> Formats {
                 codecs: audio["codecs"].as_str().unwrap_or("flac").to_string(),
             });
         }
-    }
 
     Formats { videos, audios }
 }

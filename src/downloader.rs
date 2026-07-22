@@ -11,6 +11,7 @@ pub async fn download(client: &Client, url: &str, path: &str) -> Result<()> {
     let resp = client
         .get(url)
         .header("Referer", "https://www.bilibili.com/")
+        .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
         .send()
         .await
         .context("网络请求失败")?;
