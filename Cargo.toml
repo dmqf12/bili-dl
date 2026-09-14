@@ -12,7 +12,7 @@ path = "src/bin/bili-dl.rs"
 name = "bili-dl"
 
 [dependencies]
-reqwest = { version = "0.13.4", default-features = false, features = ["query", "json", "native-tls", "stream", "gzip", "deflate", "brotli", "cookies"] }
+reqwest = { version = "0.13.4", default-features = false, features = ["query", "json", "rustls", "stream", "gzip", "deflate", "brotli", "cookies"] }
 tokio = { version = "1", features = ["full"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
